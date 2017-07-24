@@ -13,7 +13,9 @@
 <body>
 	<div id="commands">
 		<button id="edtcmd" class="hidden">Edit</button>
-		<button id="runcmd">Run</button>
+		<button id="runcmd" class="hidden">Run</button>
+		<button id="cmpcmd">Compile</button>
+		<button id="xplcmd">Sample</button>
 	</div>
 	<div id="source"></div>
 	<div id="target"></div>
@@ -76,16 +78,14 @@
 		let target = document.getElementById('target');
 		let output = document.getElementById('output');
 		let edtcmd = document.getElementById('edtcmd');
-		let cmpcmd = document.getElementById('cmpcmd');
 		let runcmd = document.getElementById('runcmd');
+		let cmpcmd = document.getElementById('cmpcmd');
+		let xplcmd = document.getElementById('xplcmd');
 		let sc = `// sample code
 import {createElement} 					from "react";
 import {render} 						from "react-dom";
 import {action, observable, useStrict}	from "mobx";
 import {observer} 						from "mobx-react";
-
-interface BoxProps 		{ model: BoxModel }
-interface BoxesProps	{ model: BoxesModel }
 
 class BoxModel {
     @observable id: string;
@@ -125,12 +125,12 @@ let model = new BoxesModel(
     ]
 );
 
-let Box   = observer((props: BoxProps) => {
+let Box   = observer((props: { model: BoxModel }) => {
     const o = props.model;
     const p = { style: { position: "absolute", background: o.c, top: o.y, left: o.x, width: o.w, height: o.h } };
     return createElement("div", p);
 });
-let Boxes = observer((props: BoxesProps) => {
+let Boxes = observer((props: { model: BoxesModel }) => {
     let b = props.model.boxes;
     let c = b.map(model => createElement(Box, { key: model.id, model }));
     return createElement("div", null, c);
@@ -166,23 +166,44 @@ model.addBox(new BoxModel("#4", 100, 100, 200, 200, "maroon"));
 				module: monaco.languages.typescript.ModuleKind.CommonJS,
 				moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
 				experimentalDecorators: true,
-				allowNonTsExtensions: true
+				allowNonTsExtensions: true,
 			}
 			monaco.languages.typescript.typescriptDefaults.setCompilerOptions(co);
-			se = monaco.editor.create(source, { theme: "vs-dark", language: "typescript", formatOnType: true, value: sc });
-			te = monaco.editor.create(target, { theme: "vs-dark", language: "javascript", readOnly: true });
+			se = monaco.editor.create(source, { theme: "vs-dark", language: "typescript", formatOnType: true, value: "" });
+			te = monaco.editor.create(target, { theme: "vs-dark", language: "javascript" });
 			ts = b;
 		});
-		window.addEventListener("resize", () => { if (se) { se.layout(); } if (te) { te.layout(); } });
-		edtcmd.addEventListener("click", () => { output.classList = ["hidden"]; edtcmd.classList = ["hidden"]; runcmd.classList = []; });
-		runcmd.addEventListener("click", () => {
+		window.addEventListener("resize", () => {
+			if (se) { se.layout(); }
+			if (te) { te.layout(); }
+		});
+		xplcmd.addEventListener("click", () => {
+			se.setValue(sc);
+		});
+		cmpcmd.addEventListener("click", () => {
 			let s = se.getValue();
 			let t = transpile(s, { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2017, noLib: true, noResolve: true, suppressOutputPathCheck: true });
 			te.setValue(t);
+			output.classList = ["hidden"];
+			cmpcmd.classList = ["hidden"];
+			xplcmd.classList = ["hidden"];
+			edtcmd.classList = [];
+			runcmd.classList = [];
+		});
+		runcmd.addEventListener("click", () => {
 			output.classList = [];
 			edtcmd.classList = [];
+			cmpcmd.classList = ["hidden"];
 			runcmd.classList = ["hidden"];
-			eval(`(function() { let exports = {};\n${t} })()`);
+			let s = te.getValue();
+			eval(`(function() { let exports = {};\n${s} })()`);
+		});
+		edtcmd.addEventListener("click", () => {
+			output.classList = ["hidden"];
+			edtcmd.classList = ["hidden"];
+			runcmd.classList = ["hidden"];
+			cmpcmd.classList = [];
+			xplcmd.classList = [];
 		});
 		function transpile(input, options) {
 			let outputText;
