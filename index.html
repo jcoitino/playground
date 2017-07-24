@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>MobX + React Playground</title>
+	<link rel="stylesheet" type="text/css" href="index.css">
+	<script src="node_modules/monaco-editor/min/vs/loader.js"></script>
+	<script>
+		let amd = require; global.require = amd.nodeRequire;
+	</script>
+</head>
+
+<body>
+	<div id="commands">
+		<button id="edtcmd" class="hidden">Edit</button>
+		<button id="runcmd">Run</button>
+	</div>
+	<div id="source"></div>
+	<div id="target"></div>
+	<div id="output" class="hidden"></div>
+	<style>
+		#source {
+			position: absolute;
+			left: 20px;
+			width: calc(50% - 30px);
+			height: calc(100% - 50px);
+			background: white;
+			overflow: hidden;
+		}
+
+		#target {
+			position: absolute;
+			left: calc(50% + 10px);
+			width: calc(50% - 30px);
+			height: calc(100% - 50px);
+			background: silver;
+			overflow: hidden;
+		}
+
+		#output {
+			position: absolute;
+			left: 20px;
+			width: calc(50% - 30px);
+			height: calc(100% - 50px);
+			background: white;
+			overflow: hidden;
+		}
+
+		#commands {
+			display: flex;
+			align-content: center;
+			align-items: center;
+			height: 30px;
+		}
+
+		#commands>button {
+			margin-left: 20px;
+		}
+
+		.hidden {
+			display: none;
+		}
+	</style>
+	<script>
+		self.module = undefined;
+		self.process.browser = true;
+		let { join, resolve } = require('path');
+		let { existsSync, readFileSync } = require('fs');
+		let read = (p) => readFileSync(join(__dirname, p)).toString();
+		let lib1 = `declare module "react" {\n${read("node_modules\\@types\\react\\index.d.ts")}\n}`;
+		let lib2 = `declare module "react-dom" {\n${read("node_modules\\@types\\react-dom\\index.d.ts")}\n}`;
+		let lib3 = `declare module "mobx" {\n${read("node_modules\\mobx\\lib\\mobx.d.ts")}\n}`;
+		let lib4 = `declare module "mobx-react" {\n${read("node_modules\\mobx-react\\index.d.ts")}\n}`;
+		let source = document.getElementById('source');
+		let target = document.getElementById('target');
+		let output = document.getElementById('output');
+		let edtcmd = document.getElementById('edtcmd');
+		let cmpcmd = document.getElementById('cmpcmd');
+		let runcmd = document.getElementById('runcmd');
+		let sc = `// sample code
+import {createElement} 		from "react";
+import {render} 			from "react-dom";
+import {action,observable}  from "mobx";
+import {observer} 			from "mobx-react";
+
+interface Box 				{ id: string, x: number, y: number, w: number, h: number, c: string }
+interface BoxProps 			{ model: Box }
+interface BoxesProps 		{ model: Box[] }
+
+let model = observable(
+    [
+        { id: "#1", x: 100, y: 100, w: 100, h: 100, c: "red"   },
+        { id: "#2", x: 100, y: 300, w: 100, h: 100, c: "green" },
+        { id: "#3", x: 300, y: 100, w: 100, h: 100, c: "blue"  },
+    ]
+);
+let actions = {
+    changeColor: action((box, color) => box.c = color),
+    moveBy:      action((box, x, y)  => { box.x += x; box.y += y; }),
+    resizeBy:    action((box, w, h)  => { box.w *= w; box.h *= h; }),
+    addBox:		 action((box)        => model.push(box)),
+}
+
+let Box   = observer((props: BoxProps) => {
+    const o = props.model;
+    const p = { style: { position: "absolute", background: o.c, top: o.y, left: o.x, width: o.w, height: o.h } };
+    return createElement("div", p);
+});
+let Boxes = observer((props: BoxesProps) => {
+    let b = props.model;
+    let c = b.map(model => createElement(Box, { key: model.id, model }));
+    return createElement("div", null, c);
+});
+
+let boxes = createElement(Boxes, { model }, null);
+let output = document.getElementById("output");
+render(boxes, output);
+
+debugger;
+actions.changeColor(model[0], "yellow");
+for (let s of [100, 100]) { 
+    actions.moveBy(model[0], s, s); 
+}
+actions.resizeBy(model[1], 2, 1);
+actions.resizeBy(model[2], 1, 2);
+actions.addBox({ id: "#4", x: 100, y: 100, w: 200, h: 200, c: "maroon" });
+`
+		let se = null;
+		let te = null;
+		let ts = null;
+		let co = null;
+		let baseUrl = 'file:///' + resolve(join(__dirname, "node_modules/monaco-editor/min")).replace(/\\/g, '/');
+		amd.config({ baseUrl });
+		amd(['vs/editor/editor.main', 'vs/language/typescript/lib/typescriptServices'], (a, b) => {
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib1, "node_modules/react/dist/react.js");
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib2, "node_modules/react-dom/react-dom.js");
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib3, "node_modules/mobx/lib/mobx.js");
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib4, "node_modules/mobx-react/index.js");
+			co = {
+				target: monaco.languages.typescript.ScriptTarget.ES2017,
+				module: monaco.languages.typescript.ModuleKind.CommonJS,
+				moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+				jsx: monaco.languages.typescript.JsxEmit.React,
+			}
+			monaco.languages.typescript.typescriptDefaults.setCompilerOptions(co);
+			sm = monaco.editor.createModel(sc, "typescript", new monaco.Uri("file:///main.tsx"));
+			se = monaco.editor.create(source, { theme: "vs-dark", model: sm });
+			te = monaco.editor.create(target, { theme: "vs-dark", language: "javascript" });
+			ts = b;
+		});
+		window.addEventListener("resize", () => { se.layout(); te.layout(); });
+		edtcmd.addEventListener("click", () => { output.classList = ["hidden"]; edtcmd.classList = ["hidden"]; runcmd.classList = []; });
+		runcmd.addEventListener("click", () => {
+			let s = se.getValue();
+			let t = transpile(s, { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2017, noLib: true, noResolve: true, suppressOutputPathCheck: true });
+			te.setValue(t);
+			output.classList = [];
+			edtcmd.classList = [];
+			runcmd.classList = ["hidden"];
+			eval(`(function() { let exports = {};\n${t} })()`);
+		});
+		function transpile(input, options) {
+			let outputText;
+			let inputFileName = options && options.jsx ? "module.tsx" : "module.ts";
+			let sourceFile = ts.createSourceFile(inputFileName, input, options.target || ts.ScriptTarget.ES5);
+			let program = ts.createProgram([inputFileName], options, {
+				getSourceFile: function (fileName) { return fileName.indexOf("module") === 0 ? sourceFile : undefined; },
+				writeFile: function (_name, text) { outputText = text; },
+				getDefaultLibFileName: function () { return "lib.d.ts"; },
+				useCaseSensitiveFileNames: function () { return false; },
+				getCanonicalFileName: function (fileName) { return fileName; },
+				getCurrentDirectory: function () { return ""; },
+				getNewLine: function () { return "\r\n"; },
+				fileExists: function (fileName) { return fileName === inputFileName || existsSync(join(__dirname, fileName)); },
+				readFile: function (fileName) { return read(fileName); },
+				directoryExists: function (fileName) { return existsSync(join(__dirname, fileName)); },
+				getDirectories: function (fileName) { return []; }
+			});
+			program.emit(); if (outputText === undefined) { throw new Error("Output generation failed"); }
+			return outputText;
+		}
+	</script>
+</body>
+
+</html>
