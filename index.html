@@ -6,7 +6,8 @@
 	<link rel="stylesheet" type="text/css" href="index.css">
 	<script src="node_modules/monaco-editor/min/vs/loader.js"></script>
 	<script>
-		let amd = require; global.require = amd.nodeRequire;
+		// FIX: Monaco overrides NODE "require" with his own AMD based
+		let amd = require; require = amd.nodeRequire;
 	</script>
 </head>
 
@@ -54,8 +55,12 @@
 				target: monaco.languages.typescript.ScriptTarget.ES2017,
 				module: monaco.languages.typescript.ModuleKind.CommonJS,
 				moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+				importHelpers: true,
 				experimentalDecorators: true,
+				strictNullChecks: true,
+				skipLibCheck: true,
 				allowNonTsExtensions: true,
+				suppressOutputPathCheck: true,
 			}
 			monaco.languages.typescript.typescriptDefaults.setCompilerOptions(co);
 			se = monaco.editor.create(source, { theme: "vs-dark", language: "typescript", formatOnType: true, value: "" });
@@ -71,7 +76,7 @@
 		});
 		cmpcmd.addEventListener("click", () => {
 			let s = se.getValue();
-			let t = transpile(s, { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2017, noLib: true, noResolve: true, suppressOutputPathCheck: true });
+			let t = transpile(s, co);
 			te.setValue(t);
 			output.classList = ["hidden"];
 			cmpcmd.classList = ["hidden"];
