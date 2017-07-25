@@ -22,16 +22,6 @@
 	<div id="target"></div>
 	<div id="output" class="hidden"></div>
 	<script>
-		self.module = undefined;
-		self.process.browser = true;
-		let { join, resolve } = require('path');
-		let { existsSync, readFileSync } = require('fs');
-		let read = (p) => readFileSync(join(__dirname, p)).toString();
-		let lib0 = `declare module "tslib" 		{\n${read("node_modules\\tslib\\tslib.d.ts")}\n}`;
-		let lib1 = `declare module "react" 		{\n${read("node_modules\\@types\\react\\index.d.ts")}\n}`;
-		let lib2 = `declare module "react-dom" 	{\n${read("node_modules\\@types\\react-dom\\index.d.ts")}\n}`;
-		let lib3 = `declare module "mobx" 		{\n${read("node_modules\\mobx\\lib\\mobx.d.ts")}\n}`;
-		let lib4 = `declare module "mobx-react" {\n${read("node_modules\\mobx-react\\index.d.ts")}\n}`;
 		let source = document.getElementById('source');
 		let target = document.getElementById('target');
 		let output = document.getElementById('output');
@@ -39,14 +29,28 @@
 		let runcmd = document.getElementById('runcmd');
 		let cmpcmd = document.getElementById('cmpcmd');
 		let xplcmd = document.getElementById('xplcmd');
-		let se = null;
-		let te = null;
-		let ts = null;
-		let co = null;
+
+		let { join, resolve } = require('path');
+		let { existsSync, readFileSync } = require('fs');
+		let read = (p) => readFileSync(join(__dirname, p)).toString();
+
+		self.module = undefined;
+		self.process.browser = true;
 		let baseUrl = 'file:///' + resolve(join(__dirname, "node_modules/monaco-editor/min")).replace(/\\/g, '/');
 		amd.config({ baseUrl });
-		amd(['vs/editor/editor.main', 'vs/language/typescript/lib/typescriptServices'], (a, b) => {
-			co = {
+		amd(['vs/editor/editor.main', 'vs/language/typescript/lib/typescriptServices'], (editor, ts) => {
+			let l0 = `declare module "tslib"      {\n${read("node_modules\\tslib\\tslib.d.ts")}\n}`;
+			let l1 = `declare module "react"      {\n${read("node_modules\\@types\\react\\index.d.ts")}\n}`;
+			let l2 = `declare module "react-dom"  {\n${read("node_modules\\@types\\react-dom\\index.d.ts")}\n}`;
+			let l3 = `declare module "mobx"       {\n${read("node_modules\\mobx\\lib\\mobx.d.ts")}\n}`;
+			let l4 = `declare module "mobx-react" {\n${read("node_modules\\mobx-react\\index.d.ts")}\n}`;
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(l0, "tslib.d.ts");
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(l1, "react.d.ts");
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(l2, "react-dom.d.ts");
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(l3, "mobx.d.ts");
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(l4, "mobx-react.d.ts");
+
+			let co = {
 				target: monaco.languages.typescript.ScriptTarget.ES2017,
 				module: monaco.languages.typescript.ModuleKind.CommonJS,
 				moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
@@ -57,7 +61,9 @@
 				allowNonTsExtensions: true,
 				suppressOutputPathCheck: true,
 			};
-			let ed = {
+			monaco.languages.typescript.typescriptDefaults.setCompilerOptions(co);
+
+			let eo = {
 				theme: "vs-dark",
 				folding: true,
 				autoIndent: true,
@@ -68,69 +74,61 @@
 				minimap: { enabled: false },
 				value: "",
 			};
-			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib0, "tslib.d.ts");
-			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib1, "react.d.ts");
-			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib2, "react-dom.d.ts");
-			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib3, "mobx.d.ts");
-			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib4, "mobx-react.d.ts");
-			monaco.languages.typescript.typescriptDefaults.setCompilerOptions(co);
-			se = monaco.editor.create(source, Object.assign(ed, { language: "typescript" }));
-			te = monaco.editor.create(target, Object.assign(ed, { language: "javascript" }));
-			ts = b;
-		});
-		window.addEventListener("resize", () => {
-			if (se) { se.layout(); }
-			if (te) { te.layout(); }
-		});
-		xplcmd.addEventListener("click", () => {
-			se.setValue(read("sample.tsx"));
-			te.setValue(read("sample.jsx"));
-		});
-		cmpcmd.addEventListener("click", () => {
-			let s = se.getValue();
-			let t = transpile(s, co);
-			te.setValue(t);
-			output.classList = ["hidden"];
-			cmpcmd.classList = ["hidden"];
-			xplcmd.classList = ["hidden"];
-			edtcmd.classList = [];
-			runcmd.classList = [];
-		});
-		runcmd.addEventListener("click", () => {
-			output.classList = [];
-			edtcmd.classList = [];
-			cmpcmd.classList = ["hidden"];
-			runcmd.classList = ["hidden"];
-			let s = te.getValue();
-			eval(`(function() { let exports = {};\n${s} })()`);
-		});
-		edtcmd.addEventListener("click", () => {
-			output.classList = ["hidden"];
-			edtcmd.classList = ["hidden"];
-			runcmd.classList = ["hidden"];
-			cmpcmd.classList = [];
-			xplcmd.classList = [];
-		});
-		function transpile(input, options) {
-			let outputText;
-			let inputFileName = options && options.jsx ? "module.tsx" : "module.ts";
-			let sourceFile = ts.createSourceFile(inputFileName, input, options.target || ts.ScriptTarget.ES5);
-			let program = ts.createProgram([inputFileName], options, {
-				getSourceFile: function (fileName) { return fileName.indexOf("module") === 0 ? sourceFile : undefined; },
-				writeFile: function (_name, text) { outputText = text; },
-				getDefaultLibFileName: function () { return "lib.d.ts"; },
-				useCaseSensitiveFileNames: function () { return false; },
-				getCanonicalFileName: function (fileName) { return fileName; },
-				getCurrentDirectory: function () { return ""; },
-				getNewLine: function () { return "\r\n"; },
-				fileExists: function (fileName) { return fileName === inputFileName || existsSync(join(__dirname, fileName)); },
-				readFile: function (fileName) { return read(fileName); },
-				directoryExists: function (fileName) { return existsSync(join(__dirname, fileName)); },
-				getDirectories: function (fileName) { return []; }
+			let se = monaco.editor.create(source, Object.assign({ language: "typescript" }, eo));
+			let te = monaco.editor.create(target, Object.assign({ language: "javascript" }, eo));
+
+			window.addEventListener("resize", () => {
+				se.layout();
+				te.layout();
 			});
-			program.emit(); if (outputText === undefined) { throw new Error("Output generation failed"); }
-			return outputText;
-		}
+			xplcmd.addEventListener("click", () => {
+				se.setValue(read("sample.tsx"));
+				te.setValue(read("sample.jsx"));
+			});
+			cmpcmd.addEventListener("click", () => {
+				te.setValue(transpile(se.getValue(), co));
+				output.classList = ["hidden"];
+				cmpcmd.classList = ["hidden"];
+				xplcmd.classList = ["hidden"];
+				edtcmd.classList = [];
+				runcmd.classList = [];
+			});
+			runcmd.addEventListener("click", () => {
+				output.classList = [];
+				edtcmd.classList = [];
+				cmpcmd.classList = ["hidden"];
+				runcmd.classList = ["hidden"];
+				eval(`(function() {\nlet exports = {};\n${te.getValue()}})()`);
+			});
+			edtcmd.addEventListener("click", () => {
+				output.classList = ["hidden"];
+				edtcmd.classList = ["hidden"];
+				runcmd.classList = ["hidden"];
+				cmpcmd.classList = [];
+				xplcmd.classList = [];
+			});
+
+			function transpile(input, options) {
+				let outputText;
+				let inputFileName = options && options.jsx ? "module.tsx" : "module.ts";
+				let sourceFile = ts.createSourceFile(inputFileName, input, options.target || ts.ScriptTarget.ES5);
+				let program = ts.createProgram([inputFileName], options, {
+					getSourceFile: (fileName) => fileName.indexOf("module") === 0 ? sourceFile : undefined,
+					writeFile: (_, text) => outputText = text,
+					getDefaultLibFileName: () => "lib.d.ts",
+					useCaseSensitiveFileNames: () => false,
+					getCanonicalFileName: (fileName) => fileName,
+					getCurrentDirectory: () => "",
+					getNewLine: () => "\r\n",
+					fileExists: (fileName) => fileName === inputFileName || existsSync(join(__dirname, fileName)),
+					readFile: (fileName) => read(fileName),
+					directoryExists: (fileName) => existsSync(join(__dirname, fileName)),
+					getDirectories: (fileName) => [],
+				});
+				program.emit(); if (outputText === undefined) { throw new Error("Output generation failed"); }
+				return outputText;
+			}
+		});
 	</script>
 </body>
 
