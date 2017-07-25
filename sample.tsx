@@ -56,13 +56,11 @@ let BoxesView = observer((props: { model: BoxesModel }) => {
     return createElement("div", null, c);
 });
 // Observable model instance
-let model = new BoxesModel(
-    [
-        new BoxModel("#1", 100, 100, 100, 100, "red"),
-        new BoxModel("#2", 100, 300, 100, 100, "green"),
-        new BoxModel("#3", 300, 100, 100, 100, "blue"),
-    ]
-);
+let model = new BoxesModel([
+    new BoxModel("#1", 100, 100, 100, 100, "red"),
+    new BoxModel("#2", 100, 300, 100, 100, "green"),
+    new BoxModel("#3", 300, 100, 100, 100, "blue"),
+]);
 // DOM Rendering
 let boxes = createElement(BoxesView, { model }, null);
 let output = document.getElementById("output");

@@ -46,11 +46,6 @@
 		let baseUrl = 'file:///' + resolve(join(__dirname, "node_modules/monaco-editor/min")).replace(/\\/g, '/');
 		amd.config({ baseUrl });
 		amd(['vs/editor/editor.main', 'vs/language/typescript/lib/typescriptServices'], (a, b) => {
-			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib0, "tslib.d.ts");
-			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib1, "react.d.ts");
-			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib2, "react-dom.d.ts");
-			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib3, "mobx.d.ts");
-			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib4, "mobx-react.d.ts");
 			co = {
 				target: monaco.languages.typescript.ScriptTarget.ES2017,
 				module: monaco.languages.typescript.ModuleKind.CommonJS,
@@ -61,10 +56,26 @@
 				skipLibCheck: true,
 				allowNonTsExtensions: true,
 				suppressOutputPathCheck: true,
-			}
+			};
+			let ed = {
+				theme: "vs-dark",
+				folding: true,
+				autoIndent: true,
+				formatOnType: true,
+				formatOnPaste: true,
+				mouseWheelZoom: true,
+				scrollBeyondLastLine: false,
+				minimap: { enabled: false },
+				value: "",
+			};
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib0, "tslib.d.ts");
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib1, "react.d.ts");
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib2, "react-dom.d.ts");
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib3, "mobx.d.ts");
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(lib4, "mobx-react.d.ts");
 			monaco.languages.typescript.typescriptDefaults.setCompilerOptions(co);
-			se = monaco.editor.create(source, { theme: "vs-dark", language: "typescript", formatOnType: true, value: "" });
-			te = monaco.editor.create(target, { theme: "vs-dark", language: "javascript" });
+			se = monaco.editor.create(source, Object.assign(ed, { language: "typescript" }));
+			te = monaco.editor.create(target, Object.assign(ed, { language: "javascript" }));
 			ts = b;
 		});
 		window.addEventListener("resize", () => {
