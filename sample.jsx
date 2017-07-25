@@ -48,28 +48,28 @@ class BoxesModel {
 }
 __decorate([observable], BoxesModel.prototype, "boxes", void 0);
 __decorate([action], BoxesModel.prototype, "addBox", null);
-// React Renderer Box
-let Box = observer((props) => {
+// React Renderer BoxView
+let BoxView = observer((props) => {
     const o = props.model;
     const p = { style: { position: "absolute", background: o.c, top: o.y, left: o.x, width: o.w, height: o.h } };
     return createElement("div", p, null);
 });
-// React Renderer Boxes
+// React Renderer BoxesView
 let executions = 0;
-let Boxes = observer((props) => {
+let BoxesView = observer((props) => {
     console.log(`render... ${executions++}`);
     let b = props.model.boxes;
-    let c = b.map(model => createElement(Box, { key: model.id, model }));
+    let c = b.map(model => createElement(BoxView, { key: model.id, model }));
     return createElement("div", null, c);
 });
-// Observable instance
+// Observable model instance
 let model = new BoxesModel([
     new BoxModel("#1", 100, 100, 100, 100, "red"),
     new BoxModel("#2", 100, 300, 100, 100, "green"),
     new BoxModel("#3", 300, 100, 100, 100, "blue"),
 ]);
 // DOM Rendering
-let boxes = createElement(Boxes, { model }, null);
+let boxes = createElement(BoxesView, { model }, null);
 let output = document.getElementById("output");
 render(boxes, output);
 // Calling actions

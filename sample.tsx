@@ -41,21 +41,21 @@ class BoxesModel {
         this.boxes.push(box);
     }
 }
-// React Renderer Box
-let Box = observer((props: { model: BoxModel }) => {
+// React Renderer BoxView
+let BoxView = observer((props: { model: BoxModel }) => {
     const o = props.model;
     const p = { style: { position: "absolute", background: o.c, top: o.y, left: o.x, width: o.w, height: o.h } };
     return createElement("div", p, null);
 });
-// React Renderer Boxes
+// React Renderer BoxesView
 let executions = 0;
-let Boxes = observer((props: { model: BoxesModel }) => {
+let BoxesView = observer((props: { model: BoxesModel }) => {
     console.log(`render... ${executions++}`);
     let b = props.model.boxes;
-    let c = b.map(model => createElement(Box, { key: model.id, model }));
+    let c = b.map(model => createElement(BoxView, { key: model.id, model }));
     return createElement("div", null, c);
 });
-// Observable instance
+// Observable model instance
 let model = new BoxesModel(
     [
         new BoxModel("#1", 100, 100, 100, 100, "red"),
@@ -64,7 +64,7 @@ let model = new BoxesModel(
     ]
 );
 // DOM Rendering
-let boxes = createElement(Boxes, { model }, null);
+let boxes = createElement(BoxesView, { model }, null);
 let output = document.getElementById("output");
 render(boxes, output);
 // Calling actions
