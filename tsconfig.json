@@ -1,0 +1,32 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "baseUrl": ".",
+        "target": "es2017",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "importHelpers": true,
+        "noImplicitAny": true,
+        "noUnusedLocals": true,
+        "jsx": "react",
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitReturns": true,
+        "forceConsistentCasingInFileNames": true,
+        "strictNullChecks": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "skipLibCheck": true,
+        "types": [
+            "reflect-metadata"
+        ],
+        "lib": [
+            "dom",
+            "dom.iterable",
+            "es2017"
+        ]
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

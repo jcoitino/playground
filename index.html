@@ -20,49 +20,6 @@
 	<div id="source"></div>
 	<div id="target"></div>
 	<div id="output" class="hidden"></div>
-	<style>
-		#source {
-			position: absolute;
-			left: 20px;
-			width: calc(50% - 30px);
-			height: calc(100% - 50px);
-			background: white;
-			overflow: hidden;
-		}
-
-		#target {
-			position: absolute;
-			left: calc(50% + 10px);
-			width: calc(50% - 30px);
-			height: calc(100% - 50px);
-			background: silver;
-			overflow: hidden;
-		}
-
-		#output {
-			position: absolute;
-			left: 20px;
-			width: calc(50% - 30px);
-			height: calc(100% - 50px);
-			background: white;
-			overflow: hidden;
-		}
-
-		#commands {
-			display: flex;
-			align-content: center;
-			align-items: center;
-			height: 30px;
-		}
-
-		#commands>button {
-			margin-left: 20px;
-		}
-
-		.hidden {
-			display: none;
-		}
-	</style>
 	<script>
 		self.module = undefined;
 		self.process.browser = true;
@@ -81,74 +38,6 @@
 		let runcmd = document.getElementById('runcmd');
 		let cmpcmd = document.getElementById('cmpcmd');
 		let xplcmd = document.getElementById('xplcmd');
-		let sc = `// sample code
-import {createElement} 					from "react";
-import {render} 						from "react-dom";
-import {action, observable, useStrict}	from "mobx";
-import {observer} 						from "mobx-react";
-
-class BoxModel {
-    @observable id: string;
-    @observable x: number;
-    @observable y: number;
-    @observable w: number;
-    @observable h: number;
-    @observable c: string;
-    constructor(id: string, x: number, y: number, w: number, h: number, c: string) {
-        this.id = id;
-        this.x = x
-        this.y = y;
-        this.w = w;
-        this.h = h;
-        this.c = c;
-    }
-    @action changeColor(color)  { this.c = color; }
-    @action moveBy(x, y)        { this.x += x; this.y += y; }
-    @action resizeBy(w, h)      { this.w *= w; this.h *= h; }
-}
-
-class BoxesModel {
-    @observable boxes: BoxModel[];
-    constructor(boxes: BoxModel[]) {
-        this.boxes = boxes;
-    }
-    @action addBox(box: BoxModel) {
-        this.boxes.push(box);
-     }
-}
-
-let model = new BoxesModel(
-    [
-        new BoxModel("#1", 100, 100, 100, 100, "red"),
-        new BoxModel("#2", 100, 300, 100, 100, "green"),
-        new BoxModel("#3", 300, 100, 100, 100, "blue"),
-    ]
-);
-
-let Box   = observer((props: { model: BoxModel }) => {
-    const o = props.model;
-    const p = { style: { position: "absolute", background: o.c, top: o.y, left: o.x, width: o.w, height: o.h } };
-    return createElement("div", p);
-});
-let Boxes = observer((props: { model: BoxesModel }) => {
-    let b = props.model.boxes;
-    let c = b.map(model => createElement(Box, { key: model.id, model }));
-    return createElement("div", null, c);
-});
-
-let boxes = createElement(Boxes, { model }, null);
-let output = document.getElementById("output");
-render(boxes, output);
-
-debugger;
-model.boxes[0].changeColor("yellow");
-for (let s of [100, 100]) { 
-    model.boxes[0].moveBy(s, s); 
-}
-model.boxes[1].resizeBy(2, 1);
-model.boxes[2].resizeBy(1, 2);
-model.addBox(new BoxModel("#4", 100, 100, 200, 200, "maroon"));
-`
 		let se = null;
 		let te = null;
 		let ts = null;
@@ -178,7 +67,7 @@ model.addBox(new BoxModel("#4", 100, 100, 200, 200, "maroon"));
 			if (te) { te.layout(); }
 		});
 		xplcmd.addEventListener("click", () => {
-			se.setValue(sc);
+			se.setValue(read("sample.ts"));
 		});
 		cmpcmd.addEventListener("click", () => {
 			let s = se.getValue();

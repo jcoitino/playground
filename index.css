@@ -9,3 +9,45 @@ body {
     padding: 0;
     margin: 0;
 }
+
+#source {
+    position: absolute;
+    left: 20px;
+    width: calc(50% - 30px);
+    height: calc(100% - 50px);
+    background: white;
+    overflow: hidden;
+}
+
+#target {
+    position: absolute;
+    left: calc(50% + 10px);
+    width: calc(50% - 30px);
+    height: calc(100% - 50px);
+    background: silver;
+    overflow: hidden;
+}
+
+#output {
+    position: absolute;
+    left: 20px;
+    width: calc(50% - 30px);
+    height: calc(100% - 50px);
+    background: white;
+    overflow: hidden;
+}
+
+#commands {
+    display: flex;
+    align-content: center;
+    align-items: center;
+    height: 30px;
+}
+
+#commands>button {
+    margin-left: 20px;
+}
+
+.hidden {
+    display: none;
+}
