@@ -4,51 +4,50 @@
 
 html,
 body {
+    display: flex;
+    flex-flow: column nowrap;
     width: 100%;
     height: 100%;
     padding: 0;
     margin: 0;
-}
-
-#source {
-    position: absolute;
-    left: 20px;
-    width: calc(50% - 30px);
-    height: calc(100% - 50px);
-    background: white;
     overflow: hidden;
+    font-family: sans-serif;
 }
 
-#target {
-    position: absolute;
-    left: calc(50% + 10px);
-    width: calc(50% - 30px);
-    height: calc(100% - 50px);
-    background: silver;
-    overflow: hidden;
-}
-
-#output {
-    position: absolute;
-    left: 20px;
-    width: calc(50% - 30px);
-    height: calc(100% - 50px);
-    background: white;
-    overflow: hidden;
-}
-
-#commands {
+.commands {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     height: 30px;
-    margin: 0 20px;
-}
-
-#commands>button {
     margin: 2px;
 }
 
-.hidden {
-    display: none;
+.commands>button {
+    margin: 2px;
+}
+
+.accordion {
+    display: flex;
+    flex:  auto;
+    flex-flow: row nowrap;
+    background: silver;
+}
+
+.accordion>.tab {
+    white-space: nowrap;
+    width: 20px;
+    height: 20px;
+    padding: 5px;
+	transform: translate(25px) rotate(90deg);
+    transform-origin: left top 0;
+    cursor: pointer
+}
+
+.accordion>.det {
+    width: 0;
+    overflow: hidden;
+    border: 1px solid gray;
+}
+
+#output {
+    background: white;
 }

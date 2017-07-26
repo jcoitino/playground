@@ -49,14 +49,14 @@ class BoxesModel {
 __decorate([observable], BoxesModel.prototype, "boxes", void 0);
 __decorate([action], BoxesModel.prototype, "addBox", null);
 // React Renderer BoxView
-let BoxView = mobx_observer((props) => {
+let BoxView = observer((props) => {
     const o = props.model;
     const p = { style: { position: "absolute", background: o.c, top: o.y, left: o.x, width: o.w, height: o.h } };
     return createElement("div", p, null);
 });
 // React Renderer BoxesView
 let executions = 0;
-let BoxesView = mobx_observer((props) => {
+let BoxesView = observer((props) => {
     console.log(`render... ${executions++}`);
     let b = props.model.boxes;
     let c = b.map(model => createElement(BoxView, { key: model.id, model }));

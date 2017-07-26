@@ -19,25 +19,25 @@ class BoxModel {
         this.h = h;
         this.c = c;
     }
-    @action changeColor(color: string) {
+    @action public changeColor(color: string) {
         this.c = color;
     }
-    @action moveBy(deltaX: number, deltaY: number) {
+    @action public moveBy(deltaX: number, deltaY: number) {
         this.x += deltaX;
         this.y += deltaY;
     }
-    @action resizeBy(deltaW: number, deltaH: number) {
+    @action public resizeBy(deltaW: number, deltaH: number) {
         this.w *= deltaW;
         this.h *= deltaH;
     }
 }
 // Observable BoxesModel
 class BoxesModel {
-    @observable boxes: BoxModel[];
+    @observable public boxes: BoxModel[];
     constructor(boxes: BoxModel[]) {
         this.boxes = boxes;
     }
-    @action addBox(box: BoxModel) {
+    @action public addBox(box: BoxModel) {
         this.boxes.push(box);
     }
 }

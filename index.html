@@ -6,29 +6,31 @@
 	<link rel="stylesheet" type="text/css" href="index.css">
 	<script src="node_modules/monaco-editor/min/vs/loader.js"></script>
 	<script>
-		// FIX: Monaco overrides NODE "require" with his own AMD based
+		// FIX: Monaco loader overrides NODE "require" with his own AMD based "require" function
 		let amd = require; require = amd.nodeRequire;
 	</script>
 </head>
 
 <body>
-	<div id="commands">
-		<button id="edtcmd" class="hidden">Edit</button>
-		<button id="runcmd" class="hidden">Run</button>
-		<button id="cmpcmd">Compile</button>
-		<button id="xplcmd">Sample</button>
+	<div class="commands">
+		<button id="xplcmd">Load sample</button>
 	</div>
-	<div id="source"></div>
-	<div id="target"></div>
-	<div id="output" class="hidden"></div>
+	<div class="accordion">
+		<div id="edtcmd" class="tab">Edit TypeScript</div>
+		<div id="source" class="det"></div>
+		<div id="cmpcmd" class="tab">Compile to JavaScript</div>
+		<div id="target" class="det"></div>
+		<div id="difcmd" class="tab">Compare TypeScript/JavaScript</div>
+		<div id="differ" class="det"></div>
+		<div id="runcmd" class="tab">Run JavaScript</div>
+		<div id="output" class="det"></div>
+	</div>
 	<script>
-		let source = document.getElementById('source');
-		let target = document.getElementById('target');
-		let output = document.getElementById('output');
-		let edtcmd = document.getElementById('edtcmd');
-		let runcmd = document.getElementById('runcmd');
-		let cmpcmd = document.getElementById('cmpcmd');
 		let xplcmd = document.getElementById('xplcmd');
+		let edtcmd = document.getElementById('edtcmd'); let source = document.getElementById('source');
+		let cmpcmd = document.getElementById('cmpcmd'); let target = document.getElementById('target');
+		let difcmd = document.getElementById('difcmd'); let differ = document.getElementById('differ');
+		let runcmd = document.getElementById('runcmd'); let output = document.getElementById('output');
 
 		let { join, resolve } = require('path');
 		let { existsSync, readFileSync } = require('fs');
@@ -38,7 +40,7 @@
 		self.process.browser = true;
 		let baseUrl = 'file:///' + resolve(join(__dirname, "node_modules/monaco-editor/min")).replace(/\\/g, '/');
 		amd.config({ baseUrl });
-		amd(['vs/editor/editor.main', 'vs/language/typescript/lib/typescriptServices'], (editor, ts) => {
+		amd(['vs/editor/editor.main', 'vs/language/typescript/lib/typescriptServices'], (ed, ts) => {
 			let l0 = `declare module "tslib"      {\n${read("node_modules\\tslib\\tslib.d.ts")}\n}`;
 			let l1 = `declare module "react"      {\n${read("node_modules\\@types\\react\\index.d.ts")}\n}`;
 			let l2 = `declare module "react-dom"  {\n${read("node_modules\\@types\\react-dom\\index.d.ts")}\n}`;
@@ -76,36 +78,44 @@
 			};
 			let se = monaco.editor.create(source, Object.assign({ language: "typescript" }, eo));
 			let te = monaco.editor.create(target, Object.assign({ language: "javascript" }, eo));
+			let de = monaco.editor.createDiffEditor(differ, Object.assign({ enableSplitViewResizing: true }, eo));
+			de.setModel({ original: se.getModel(), modified: te.getModel() });
+
+
+			let select = (c) => {
+				[source, target, differ, output].forEach(s => s.style.flex = s === c ? "auto" : "");
+				se.layout();
+				te.layout();
+				de.layout();
+			}
+			select(source);
 
 			window.addEventListener("resize", () => {
 				se.layout();
 				te.layout();
+				de.layout();
 			});
 			xplcmd.addEventListener("click", () => {
 				se.setValue(read("sample.tsx"));
 				te.setValue(read("sample.jsx"));
 			});
+			edtcmd.addEventListener("click", () => {
+				select(source);
+				se.layout();
+			});
 			cmpcmd.addEventListener("click", () => {
+				select(target);
 				te.setValue(transpile(se.getValue(), co));
-				output.classList = ["hidden"];
-				cmpcmd.classList = ["hidden"];
-				xplcmd.classList = ["hidden"];
-				edtcmd.classList = [];
-				runcmd.classList = [];
+				te.layout();
+			});
+			difcmd.addEventListener("click", () => {
+				select(differ);
+				de.setModel({ original: se.getModel(), modified: te.getModel() });
+				de.layout();
 			});
 			runcmd.addEventListener("click", () => {
-				output.classList = [];
-				edtcmd.classList = [];
-				cmpcmd.classList = ["hidden"];
-				runcmd.classList = ["hidden"];
+				select(output);
 				eval(`(function() {\nlet exports = {};\n${te.getValue()}})()`);
-			});
-			edtcmd.addEventListener("click", () => {
-				output.classList = ["hidden"];
-				edtcmd.classList = ["hidden"];
-				runcmd.classList = ["hidden"];
-				cmpcmd.classList = [];
-				xplcmd.classList = [];
 			});
 
 			function transpile(input, options) {
