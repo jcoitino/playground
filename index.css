@@ -49,5 +49,6 @@ body {
 }
 
 #output {
-    background: white;
+    position: relative;
+    background: white;    
 }
