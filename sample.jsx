@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const { __decorate } = require("tslib");
+const tslib_1 = require("tslib");
 // sample code
-const { createElement } = require("react");
-const { render } = require("react-dom");
-const { action, observable } = require("mobx");
-const { observer } = require("mobx-react");
-// Observable BoxModel
+const React = require("react");
+const ReactDom = require("react-dom");
+const MobX = require("mobx");
+const MobXReact = require("mobx-react");
+// BoxModel (observable)
 class BoxModel {
     constructor(id, x, y, w, h, c) {
         this.id = id;
@@ -23,22 +23,28 @@ class BoxModel {
         this.x += deltaX;
         this.y += deltaY;
     }
-    resizeBy(deltaW, deltaH) {
-        this.w *= deltaW;
-        this.h *= deltaH;
+    resizeBy(scaleW, scaleH) {
+        this.w *= scaleW;
+        this.h *= scaleH;
     }
 }
-__decorate([observable], BoxModel.prototype, "id", void 0);
-__decorate([observable], BoxModel.prototype, "x", void 0);
-__decorate([observable], BoxModel.prototype, "y", void 0);
-__decorate([observable], BoxModel.prototype, "w", void 0);
-__decorate([observable], BoxModel.prototype, "h", void 0);
-__decorate([observable], BoxModel.prototype, "c", void 0);
-__decorate([action], BoxModel.prototype, "changeColor", null);
-__decorate([action], BoxModel.prototype, "moveBy", null);
-__decorate([action], BoxModel.prototype, "resizeBy", null);
-// Observable BoxesModel
-class BoxesModel {
+tslib_1.__decorate([MobX.observable], BoxModel.prototype, "id", void 0);
+tslib_1.__decorate([MobX.observable], BoxModel.prototype, "x", void 0);
+tslib_1.__decorate([MobX.observable], BoxModel.prototype, "y", void 0);
+tslib_1.__decorate([MobX.observable], BoxModel.prototype, "w", void 0);
+tslib_1.__decorate([MobX.observable], BoxModel.prototype, "h", void 0);
+tslib_1.__decorate([MobX.observable], BoxModel.prototype, "c", void 0);
+tslib_1.__decorate([MobX.action], BoxModel.prototype, "changeColor", null);
+tslib_1.__decorate([MobX.action], BoxModel.prototype, "moveBy", null);
+tslib_1.__decorate([MobX.action], BoxModel.prototype, "resizeBy", null);
+// BoxView (React renderer)
+let BoxView = MobXReact.observer((props) => {
+    const o = props.model;
+    const p = { style: { position: "absolute", background: o.c, top: o.y, left: o.x, width: o.w, height: o.h } };
+    return React.createElement("div", p, null);
+});
+// ScreebModel (observable)
+class ScreenModel {
     constructor(boxes) {
         this.boxes = boxes;
     }
@@ -46,38 +52,32 @@ class BoxesModel {
         this.boxes.push(box);
     }
 }
-__decorate([observable], BoxesModel.prototype, "boxes", void 0);
-__decorate([action], BoxesModel.prototype, "addBox", null);
-// React Renderer BoxView
-let BoxView = observer((props) => {
-    const o = props.model;
-    const p = { style: { position: "absolute", background: o.c, top: o.y, left: o.x, width: o.w, height: o.h } };
-    return createElement("div", p, null);
-});
-// React Renderer BoxesView
-let executions = 0;
-let BoxesView = observer((props) => {
+tslib_1.__decorate([MobX.observable], ScreenModel.prototype, "boxes", void 0);
+tslib_1.__decorate([MobX.action], ScreenModel.prototype, "addBox", null);
+// ScreenView (React renderer)
+let ScreenView = MobXReact.observer((props) => {
     console.log(`render... ${executions++}`);
     let b = props.model.boxes;
-    let c = b.map(model => createElement(BoxView, { key: model.id, model }));
-    return createElement("div", null, c);
+    let c = b.map(boxModel => React.createElement(BoxView, { key: boxModel.id, model: boxModel }));
+    return React.createElement("div", null, c);
 });
+let executions = 0;
 // Observable model instance
-let model = new BoxesModel([
+let myScreen = new ScreenModel([
     new BoxModel("#1", 100, 100, 100, 100, "red"),
     new BoxModel("#2", 100, 300, 100, 100, "green"),
     new BoxModel("#3", 300, 100, 100, 100, "blue"),
 ]);
 // DOM Rendering
-let boxes = createElement(BoxesView, { model }, null);
+let screen = React.createElement(ScreenView, { model: myScreen }, null);
 let output = document.getElementById("output");
-render(boxes, output);
+ReactDom.render(screen, output);
 // Calling actions
 debugger;
-model.boxes[0].changeColor("yellow");
+myScreen.boxes[0].changeColor("yellow");
 for (let s of [100, 100]) {
-    model.boxes[0].moveBy(s, s);
+    myScreen.boxes[0].moveBy(s, s);
 }
-model.boxes[1].resizeBy(2, 1);
-model.boxes[2].resizeBy(1, 2);
-model.addBox(new BoxModel("#4", 100, 100, 200, 200, "maroon"));
+myScreen.boxes[1].resizeBy(2, 1);
+myScreen.boxes[2].resizeBy(1, 2);
+myScreen.addBox(new BoxModel("#4", 100, 100, 200, 200, "maroon"));

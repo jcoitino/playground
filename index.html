@@ -6,7 +6,7 @@
 	<link rel="stylesheet" type="text/css" href="index.css">
 	<script src="node_modules/monaco-editor/min/vs/loader.js"></script>
 	<script>
-		// FIX: Monaco loader overrides NODE "require" with his own AMD based "require" function
+		// workarround: Monaco loader overrides NODE "require" with his own AMD based "require" function
 		let amd = require; require = amd.nodeRequire;
 	</script>
 </head>
@@ -26,21 +26,24 @@
 		<div id="output" class="det"></div>
 	</div>
 	<script>
+		// UI Elements (DOM references)
 		let xplcmd = document.getElementById('xplcmd');
 		let edtcmd = document.getElementById('edtcmd'); let source = document.getElementById('source');
 		let cmpcmd = document.getElementById('cmpcmd'); let target = document.getElementById('target');
 		let difcmd = document.getElementById('difcmd'); let differ = document.getElementById('differ');
 		let runcmd = document.getElementById('runcmd'); let output = document.getElementById('output');
-
+		// File loader helper
 		let { join, resolve } = require('path');
 		let { existsSync, readFileSync } = require('fs');
 		let read = (p) => readFileSync(join(__dirname, p)).toString();
-
+		// Workarround: fix to allow AMD modules system used by Monaco implementation
 		self.module = undefined;
 		self.process.browser = true;
+		// Monaco initilization
 		let baseUrl = 'file:///' + resolve(join(__dirname, "node_modules/monaco-editor/min")).replace(/\\/g, '/');
 		amd.config({ baseUrl });
 		amd(['vs/editor/editor.main', 'vs/language/typescript/lib/typescriptServices'], (ed, ts) => {
+			// extra libs loading (tslib, react, react-dom, mobx, mobx-react)
 			let l0 = `declare module "tslib"      {\n${read("node_modules\\tslib\\tslib.d.ts")}\n}`;
 			let l1 = `declare module "react"      {\n${read("node_modules\\@types\\react\\index.d.ts")}\n}`;
 			let l2 = `declare module "react-dom"  {\n${read("node_modules\\@types\\react-dom\\index.d.ts")}\n}`;
@@ -51,7 +54,7 @@
 			monaco.languages.typescript.typescriptDefaults.addExtraLib(l2, "react-dom.d.ts");
 			monaco.languages.typescript.typescriptDefaults.addExtraLib(l3, "mobx.d.ts");
 			monaco.languages.typescript.typescriptDefaults.addExtraLib(l4, "mobx-react.d.ts");
-
+			// Typescript Compiler options
 			let co = {
 				target: monaco.languages.typescript.ScriptTarget.ES2017,
 				module: monaco.languages.typescript.ModuleKind.CommonJS,
@@ -64,7 +67,7 @@
 				suppressOutputPathCheck: true,
 			};
 			monaco.languages.typescript.typescriptDefaults.setCompilerOptions(co);
-
+			// Monaco Editor options
 			let eo = {
 				theme: "vs-dark",
 				folding: true,
@@ -76,12 +79,11 @@
 				minimap: { enabled: false },
 				value: "",
 			};
+			// Editors (typescript, javascript, and diff )
 			let se = monaco.editor.create(source, Object.assign({ language: "typescript" }, eo));
 			let te = monaco.editor.create(target, Object.assign({ language: "javascript" }, eo));
 			let de = monaco.editor.createDiffEditor(differ, Object.assign({ enableSplitViewResizing: true }, eo));
-			de.setModel({ original: se.getModel(), modified: te.getModel() });
-
-
+			// Tab selection helper
 			let select = (c) => {
 				[source, target, differ, output].forEach(s => s.style.flex = s === c ? "auto" : "");
 				se.layout();
@@ -89,7 +91,7 @@
 				de.layout();
 			}
 			select(source);
-
+			// Event handlers
 			window.addEventListener("resize", () => {
 				se.layout();
 				te.layout();
@@ -117,7 +119,7 @@
 				select(output);
 				eval(`(function() {\nlet exports = {};\n${te.getValue()}})()`);
 			});
-
+			// Transpilation helper
 			function transpile(input, options) {
 				let outputText;
 				let inputFileName = options && options.jsx ? "module.tsx" : "module.ts";
