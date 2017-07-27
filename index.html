@@ -76,6 +76,7 @@
 				mouseWheelZoom: true,
 				scrollBeyondLastLine: false,
 				minimap: { enabled: false },
+				fontSize: "24px",
 				value: "",
 			};
 			// Editors (typescript, javascript, and diff )
@@ -98,7 +99,7 @@
 			const exit = menu.items[0].submenu.items[menu.items[0].submenu.items.length - 1];
 			menu.items[0].submenu.clear();
 			menu.items[0].submenu.append(new MenuItem({
-				label: 'Load',
+				label: 'Open',
 				click() {
 					const selection = dialog.showOpenDialog({
 						title: "Open Typescript file:",
@@ -126,18 +127,20 @@
 				se.layout();
 			});
 			cmpcmd.addEventListener("click", () => {
-				select(target);
 				te.setValue(transpile(se.getValue(), co));
+				select(target);
 				te.layout();
 			});
 			difcmd.addEventListener("click", () => {
-				select(differ);
+				if (te.getValue() === "") { te.setValue(transpile(se.getValue(), co)); }
 				de.setModel({ original: se.getModel(), modified: te.getModel() });
+				select(differ);
 				de.layout();
 			});
 			runcmd.addEventListener("click", () => {
+				if (te.getValue() === "") { te.setValue(transpile(se.getValue(), co)); }
 				select(output);
-				eval(`(function() {\nlet exports = {};\n${te.getValue()}})()`);
+				eval(`(function() {\nlet exports = {};\nlet output = document.querySelector("#output");\noutput.innerHTML = "";\n${te.getValue()}})()`);
 			});
 			// Transpilation helper
 			function transpile(input, options) {
