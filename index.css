@@ -14,17 +14,6 @@ body {
     font-family: sans-serif;
 }
 
-.commands {
-    display: flex;
-    align-items: center;
-    height: 30px;
-    margin: 2px;
-}
-
-.commands>button {
-    margin: 2px;
-}
-
 .accordion {
     display: flex;
     flex:  auto;

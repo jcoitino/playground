@@ -12,9 +12,6 @@
 </head>
 
 <body>
-	<div class="commands">
-		<button id="xplcmd">Load sample</button>
-	</div>
 	<div class="accordion">
 		<div id="edtcmd" class="tab">Edit TypeScript</div>
 		<div id="source" class="det"></div>
@@ -91,15 +88,33 @@
 				de.layout();
 			}
 			select(source);
+			// Adjus electron menu
+			const { extname } = require("path");
+			const { remote } = require("electron");
+			const { Menu, MenuItem, dialog } = remote;
+			const menu = Menu.getApplicationMenu();
+			menu.items[0].submenu.insert(0, new MenuItem({
+				label: 'Load',
+				click() {
+					const selection = dialog.showOpenDialog({
+						title: "Open Typescript file:",
+						filters: [{ name: "Typescript", extensions: ["ts"] }],
+						properties: ["openFile"],
+					});
+					if (selection instanceof Array) {
+						const tsfile = selection[0];
+						const jsfile = tsfile.substr(0, tsfile.length - 3) + ".js";
+						if (existsSync(tsfile)) se.setValue(readFileSync(tsfile).toString());
+						if (existsSync(jsfile)) te.setValue(readFileSync(jsfile).toString());
+					}
+				}
+			}));
+			Menu.setApplicationMenu(menu)
 			// Event handlers
 			window.addEventListener("resize", () => {
 				se.layout();
 				te.layout();
 				de.layout();
-			});
-			xplcmd.addEventListener("click", () => {
-				se.setValue(read("sample.tsx"));
-				te.setValue(read("sample.jsx"));
 			});
 			edtcmd.addEventListener("click", () => {
 				select(source);
