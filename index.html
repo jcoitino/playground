@@ -108,9 +108,8 @@
 					});
 					if (selection instanceof Array) {
 						const tsfile = selection[0];
-						const jsfile = tsfile.substr(0, tsfile.length - 3) + ".js";
-						if (existsSync(tsfile)) se.setValue(readFileSync(tsfile).toString());
-						if (existsSync(jsfile)) te.setValue(readFileSync(jsfile).toString());
+						se.setValue(readFileSync(tsfile).toString());
+						te.setValue(transpile(se.getValue(), co));
 					}
 				}
 			}));
@@ -127,19 +126,19 @@
 				se.layout();
 			});
 			cmpcmd.addEventListener("click", () => {
-				te.setValue(transpile(se.getValue(), co));
 				select(target);
+				te.setValue(transpile(se.getValue(), co));
 				te.layout();
 			});
 			difcmd.addEventListener("click", () => {
+				select(differ);
 				if (te.getValue() === "") { te.setValue(transpile(se.getValue(), co)); }
 				de.setModel({ original: se.getModel(), modified: te.getModel() });
-				select(differ);
 				de.layout();
 			});
 			runcmd.addEventListener("click", () => {
-				if (te.getValue() === "") { te.setValue(transpile(se.getValue(), co)); }
 				select(output);
+				if (te.getValue() === "") { te.setValue(transpile(se.getValue(), co)); }
 				eval(`(function() {\nlet exports = {};\ndocument.querySelector("#output").innerHTML = "";\n${te.getValue()}})()`);
 			});
 			// Transpilation helper
