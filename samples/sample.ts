@@ -57,26 +57,25 @@ let ScreenView = MobXReact.observer((props: ScreenViewProps) => {
     let c = b.map(boxModel => React.createElement(BoxView, { key: boxModel.id, model: boxModel }));
     return React.createElement("div", null, c);
 });
+let executions = 0;
 interface ScreenViewProps {
     model: ScreenModel
 }
-let executions = 0;
 // Observable model instance
-let myScreen = new ScreenModel([
-    new BoxModel("#1", 100, 100, 100, 100, "red"),
-    new BoxModel("#2", 100, 300, 100, 100, "green"),
-    new BoxModel("#3", 300, 100, 100, 100, "blue"),
-]);
+let box1 = new BoxModel("#1", 100, 100, 100, 100, "red");
+let box2 = new BoxModel("#2", 100, 300, 100, 100, "green");
+let box3 = new BoxModel("#3", 300, 100, 100, 100, "blue");
+let myScreen = new ScreenModel([box1, box2, box3]);
 // DOM Rendering
 let screen = React.createElement(ScreenView, { model: myScreen }, null);
 let output = document.getElementById("output");
 ReactDom.render(screen, output);
 // Calling actions
 debugger;
-myScreen.boxes[0].changeColor("yellow");
-for (let s of [100, 100]) {
-    myScreen.boxes[0].moveBy(s, s);
-}
-myScreen.boxes[1].resizeBy(2, 1);
-myScreen.boxes[2].resizeBy(1, 2);
-myScreen.addBox(new BoxModel("#4", 100, 100, 200, 200, "maroon"));
+box1.changeColor("yellow");
+box1.moveBy(100, 100);
+box1.moveBy(100, 100);
+box2.resizeBy(2, 1);
+box3.resizeBy(1, 2);
+let box4 = new BoxModel("#4", 100, 100, 200, 200, "maroon");
+myScreen.addBox(box4);

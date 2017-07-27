@@ -15,16 +15,18 @@
 	<div class="accordion">
 		<div id="edtcmd" class="tab">Edit TypeScript</div>
 		<div id="source" class="det"></div>
+
 		<div id="cmpcmd" class="tab">Compile to JavaScript</div>
 		<div id="target" class="det"></div>
+
 		<div id="difcmd" class="tab">Compare TypeScript/JavaScript</div>
 		<div id="differ" class="det"></div>
+
 		<div id="runcmd" class="tab">Run JavaScript</div>
 		<div id="output" class="det"></div>
 	</div>
 	<script>
 		// UI Elements (DOM references)
-		let xplcmd = document.getElementById('xplcmd');
 		let edtcmd = document.getElementById('edtcmd'); let source = document.getElementById('source');
 		let cmpcmd = document.getElementById('cmpcmd'); let target = document.getElementById('target');
 		let difcmd = document.getElementById('difcmd'); let differ = document.getElementById('differ');
@@ -93,7 +95,9 @@
 			const { remote } = require("electron");
 			const { Menu, MenuItem, dialog } = remote;
 			const menu = Menu.getApplicationMenu();
-			menu.items[0].submenu.insert(0, new MenuItem({
+			const exit = menu.items[0].submenu.items[menu.items[0].submenu.items.length - 1];
+			menu.items[0].submenu.clear();
+			menu.items[0].submenu.append(new MenuItem({
 				label: 'Load',
 				click() {
 					const selection = dialog.showOpenDialog({
@@ -109,6 +113,7 @@
 					}
 				}
 			}));
+			menu.items[0].submenu.append(exit);
 			Menu.setApplicationMenu(menu)
 			// Event handlers
 			window.addEventListener("resize", () => {
