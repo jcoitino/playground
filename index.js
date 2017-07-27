@@ -7,7 +7,8 @@ let url = format({ pathname: join(__dirname, 'index.html'), protocol: 'file:', s
 
 function createWindow() {
     if (win === null) {
-        win = new BrowserWindow({ width: 800, height: 600 })
+        win = new BrowserWindow({});
+        win.maximize();
         win.loadURL(url);
         win.webContents.openDevTools({ mode: "bottom" });
         win.on('closed', () => win = null);
