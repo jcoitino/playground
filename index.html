@@ -109,7 +109,7 @@
 					});
 					if (selection instanceof Array) {
 						se.setValue(readFileSync(selection[0]).toString());
-						compiled = false;
+						te.setValue(transpile(se.getValue(), co));
 					}
 				}
 			}));
