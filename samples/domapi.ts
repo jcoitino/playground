@@ -7,6 +7,7 @@ myDiv.style.left = "100px";
 myDiv.style.width = "100px";
 myDiv.style.height = "100px";
 myDiv.style.background = "blue";
+myDiv.setAttribute("draggable", "true");
 
 let myParent = document.querySelector("#output") as HTMLDivElement;
 myParent.appendChild(myDiv);
