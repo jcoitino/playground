@@ -42,6 +42,7 @@
 		let baseUrl = 'file:///' + resolve(join(__dirname, "node_modules/monaco-editor/min")).replace(/\\/g, '/');
 		amd.config({ baseUrl });
 		amd(['vs/editor/editor.main', 'vs/language/typescript/lib/typescriptServices'], (ed, ts) => {
+			let compiled = false;
 			// extra libs loading (tslib, react, react-dom, mobx, mobx-react)
 			let l0 = `declare module "tslib"      {\n${read("node_modules\\tslib\\tslib.d.ts")}\n}`;
 			let l1 = `declare module "react"      {\n${read("node_modules\\@types\\react\\index.d.ts")}\n}`;
@@ -107,9 +108,8 @@
 						properties: ["openFile"],
 					});
 					if (selection instanceof Array) {
-						const tsfile = selection[0];
-						se.setValue(readFileSync(tsfile).toString());
-						te.setValue(transpile(se.getValue(), co));
+						se.setValue(readFileSync(selection[0]).toString());
+						compiled = false;
 					}
 				}
 			}));
@@ -124,6 +124,7 @@
 			edtcmd.addEventListener("click", () => {
 				select(source);
 				se.layout();
+				compiled = false;
 			});
 			cmpcmd.addEventListener("click", () => {
 				select(target);
@@ -132,13 +133,13 @@
 			});
 			difcmd.addEventListener("click", () => {
 				select(differ);
-				if (te.getValue() === "") { te.setValue(transpile(se.getValue(), co)); }
+				if (!compiled) { te.setValue(transpile(se.getValue(), co)); }
 				de.setModel({ original: se.getModel(), modified: te.getModel() });
 				de.layout();
 			});
 			runcmd.addEventListener("click", () => {
 				select(output);
-				if (te.getValue() === "") { te.setValue(transpile(se.getValue(), co)); }
+				if (!compiled) { te.setValue(transpile(se.getValue(), co)); }
 				eval(`(function() {\nlet exports = {};\ndocument.querySelector("#output").innerHTML = "";\n${te.getValue()}})()`);
 			});
 			// Transpilation helper
@@ -160,6 +161,7 @@
 					getDirectories: (fileName) => [],
 				});
 				program.emit(); if (outputText === undefined) { throw new Error("Output generation failed"); }
+				compiled = true;
 				return outputText;
 			}
 		});
