@@ -8,9 +8,7 @@ myDiv.style.height = "100px";
 myDiv.style.background = "blue";
 
 let myParent = document.querySelector("#output");
-if (myParent !== null) {
-    myParent.appendChild(myDiv);
-}
+myParent!.appendChild(myDiv);
 
 myDiv.style.top = "200px";
 myDiv.style.left = "200px";
@@ -25,6 +23,7 @@ myDiv.addEventListener("mouseover", () => {
     myDiv.style.borderRadius = "50%";
     myDiv.style.cursor = "pointer";
 });
+
 myDiv.addEventListener("mouseout", () => {
     myDiv.style.opacity = "1.0";
     myDiv.style.background = "red";
@@ -32,21 +31,20 @@ myDiv.addEventListener("mouseout", () => {
     myDiv.style.borderRadius = "0";
     myDiv.style.cursor = "default";
 });
+
 myDiv.addEventListener("mousedown", (e: MouseEvent) => {
-    if (myParent !== null) {
-        myDiv.style.cursor = "move";
-        let moveHandler = (e: MouseEvent) => {
-            myDiv.style.top = `${myDiv.offsetTop + e.movementY}px`;
-            myDiv.style.left = `${myDiv.offsetLeft + e.movementX}px`;
-        };
-        let endHandler = () => {
-            if (myParent !== null) {
-                myDiv.style.cursor = "pointer";
-                myParent.removeEventListener("mousemove", moveHandler);
-                myParent.removeEventListener("mouseup", endHandler);
-            }
-        }
-        myParent.addEventListener("mousemove", moveHandler);
-        myParent.addEventListener("mouseup", endHandler);
+    myDiv.style.cursor = "move";
+    let moveHandler = (e: MouseEvent) => {
+        myDiv.style.top = `${myDiv.offsetTop + e.movementY}px`;
+        myDiv.style.left = `${myDiv.offsetLeft + e.movementX}px`;
+    };
+
+    let endHandler = () => {
+        myDiv.style.cursor = "pointer";
+        myParent!.removeEventListener("mousemove", moveHandler);
+        myParent!.removeEventListener("mouseup", endHandler);
     }
+
+    myParent!.addEventListener("mousemove", moveHandler);
+    myParent!.addEventListener("mouseup", endHandler);
 });
