@@ -44,16 +44,18 @@
 		amd(['vs/editor/editor.main', 'vs/language/typescript/lib/typescriptServices'], (ed, ts) => {
 			let compiled = false;
 			// extra libs loading (tslib, react, react-dom, mobx, mobx-react)
-			let l0 = `declare module "tslib"      {\n${read("node_modules\\tslib\\tslib.d.ts")}\n}`;
-			let l1 = `declare module "react"      {\n${read("node_modules\\@types\\react\\index.d.ts")}\n}`;
-			let l2 = `declare module "react-dom"  {\n${read("node_modules\\@types\\react-dom\\index.d.ts")}\n}`;
-			let l3 = `declare module "mobx"       {\n${read("node_modules\\mobx\\lib\\mobx.d.ts")}\n}`;
-			let l4 = `declare module "mobx-react" {\n${read("node_modules\\mobx-react\\index.d.ts")}\n}`;
-			monaco.languages.typescript.typescriptDefaults.addExtraLib(l0, "tslib.d.ts");
-			monaco.languages.typescript.typescriptDefaults.addExtraLib(l1, "react.d.ts");
-			monaco.languages.typescript.typescriptDefaults.addExtraLib(l2, "react-dom.d.ts");
-			monaco.languages.typescript.typescriptDefaults.addExtraLib(l3, "mobx.d.ts");
-			monaco.languages.typescript.typescriptDefaults.addExtraLib(l4, "mobx-react.d.ts");
+			let l1 = `declare module "tslib"      {\n${read("node_modules\\tslib\\tslib.d.ts")}\n}`;
+			let l2 = `declare module "node"       {\n${read("node_modules\\@types\\node\\index.d.ts")}\n}`;
+			let l3 = `declare module "react"      {\n${read("node_modules\\@types\\react\\index.d.ts")}\n}`;
+			let l4 = `declare module "react-dom"  {\n${read("node_modules\\@types\\react-dom\\index.d.ts")}\n}`;
+			let l5 = `declare module "mobx"       {\n${read("node_modules\\mobx\\lib\\mobx.d.ts")}\n}`;
+			let l6 = `declare module "mobx-react" {\n${read("node_modules\\mobx-react\\index.d.ts")}\n}`;
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(l1, "tslib.d.ts");
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(l2, "node.d.ts");
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(l3, "react.d.ts");
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(l4, "react-dom.d.ts");
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(l5, "mobx.d.ts");
+			monaco.languages.typescript.typescriptDefaults.addExtraLib(l6, "mobx-react.d.ts");
 			// Typescript Compiler options
 			let co = {
 				target: monaco.languages.typescript.ScriptTarget.ES2017,
