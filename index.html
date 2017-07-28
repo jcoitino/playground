@@ -148,7 +148,7 @@
 			function transpile(input, options) {
 				let outputText;
 				let inputFileName = options && options.jsx ? "module.tsx" : "module.ts";
-				let sourceFile = ts.createSourceFile(inputFileName, input, options.target || ts.ScriptTarget.ES5);
+				let sourceFile = ts.createSourceFile(inputFileName, input, options.target);
 				let program = ts.createProgram([inputFileName], options, {
 					getSourceFile: (fileName) => fileName.indexOf("module") === 0 ? sourceFile : undefined,
 					writeFile: (_, text) => outputText = text,
