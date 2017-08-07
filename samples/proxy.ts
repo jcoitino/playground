@@ -16,15 +16,15 @@ let o = {
 };
 let h = {
     has: (t, p) => {
-        log(`[PROXY HANDLER] target has property '${p}'`);
+        log(`[PROXY HANDLER] target has property '${p}': ${typeof t[p]}`);
         return p in t;        
     },
     get: (t, p) => {
-        log(`[PROXY HANDLER] get target property '${p}'`);
+        log(`[PROXY HANDLER] get target property '${p}': ${typeof t[p]}`);
         return t[p];
     },
     set: (t, p, v) => {
-        log(`[PROXY HANDLER] set target property '${p}', ${0}`);
+        log(`[PROXY HANDLER] set target property '${p}' <- `, v, " : ", typeof v);
         t[p] = v;
         return true;
     },
