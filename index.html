@@ -142,7 +142,7 @@
 			runcmd.addEventListener("click", () => {
 				select(output);
 				if (!compiled) { te.setValue(transpile(se.getValue(), co)); }
-				eval(`(function() {\nlet exports = {};\ndocument.querySelector("#output").innerHTML = "";\n${te.getValue()}})()`);
+				eval(`(function() {\nlet exports = {};\ndocument.querySelector("#output").innerHTML = "";\nconsole.clear();\n${te.getValue()}})()`);
 			});
 			// Transpilation helper
 			function transpile(input, options) {
